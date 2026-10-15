@@ -1,7 +1,6 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include <string.h>
 int var=0,i,nc=0,cLine=0,flag=0;
 int lineNumber=1;
@@ -159,9 +158,25 @@ L?\"(\\.|[^\\"])*	{
 
 int main(int argc,char **argv)
 {
-	comment = (char*)malloc(100*sizeof(char));
-	yyin=fopen(argv[1],"r");
-	inputFile=argv[1];
+	if (argc < 2) {
+		fprintf(stderr, "Usage: %s <input-file>\n", argv[0]);
+		return 1;
+	}
+
+	yyin = fopen(argv[1], "r");
+	if (yyin == NULL) {
+		perror(argv[1]);
+		return 1;
+	}
+
+	inputFile = argv[1];
+
+	comment = calloc(100, sizeof(char));
+	if (comment == NULL) {
+		perror("calloc");
+		fclose(yyin);
+		return 1;
+	}
 
 	symbol=fopen("symbolTable.txt","w"); //File to write symbol table
 	fprintf(symbol,"\n Symbol Table:\n \t\tLexeme\t\t\t\tType\t\t\tAttribute Value\t\t\tLine Number\n");
@@ -207,25 +222,34 @@ void storeSingleLineComment(char *yytext)
 	int i, j=0;
 	char *temp;
 	temp = (char*)malloc((len+1)*sizeof(char));
-	for(i=2;yytext[i]!='\0';i++)
-	{
+	for (i = 2; yytext[i] != '\0'; i++) {
 		temp[j++] = yytext[i];
 	}
-	strcat(temp,"\n");
+	temp[j] = '\0';
+	strcat(temp, "\n");
 	strcat(s_comment,temp);
 }
+
 void displayComment(char *yytext)
 {
-    int l1, l2;
-    char *temp;
-
-    l1 = strlen(comment);
-    l2 = strlen(yytext);
-    temp = (char*)malloc((l1+1)*sizeof(char));
-    strcpy(temp,comment);
-    comment = (char*)malloc((l1+l2+1)*sizeof(char));
-    strcat(temp,yytext);
-    strcpy(comment,temp);
+    size_t l1 = strlen(comment);
+    size_t l2 = strlen(yytext);
+    char *temp = malloc(l1 + l2 + 1);
+    if (temp == NULL) {
+        perror("malloc");
+        exit(EXIT_FAILURE);
+    }
+    strcpy(temp, comment);
+    strcat(temp, yytext);
+    char *new_comment = realloc(comment, l1 + l2 + 1);
+    if (new_comment == NULL) {
+        free(temp);
+        perror("realloc");
+        exit(EXIT_FAILURE);
+    }
+    comment = new_comment;
+    strcpy(comment, temp);
+    free(temp);
 }
 void insertToTable(char *yytext,char type)
 {
