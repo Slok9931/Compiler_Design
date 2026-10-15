@@ -6,6 +6,7 @@ int nestedCommentCount=0;
 int commentFlag=0;
 char *tablePtr;
 void addToken(char*);
+void makeList(char *, char, int);
 %}
 
 digit			[0-9]
@@ -148,9 +149,9 @@ multilineCommentEnd (\*\/)
 .			{ }
 
 %%
-yywrap()
+int yywrap(void)
 {
-	return(1);
+    return 1;
 }
 
 void addToken(char *yytext)

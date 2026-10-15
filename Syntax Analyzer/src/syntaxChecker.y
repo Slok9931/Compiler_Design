@@ -25,6 +25,8 @@ tokenList *parsedPtr=NULL;
 char *sourceCode=NULL;
 int errorFlag=0;
 void makeList(char *,char,int);
+int yylex(void);
+void yyerror(const char *s);
 %}
 
 %token  AUTO BREAK  CASE CHAR  CONST  CONTINUE  DEFAULT  DO DOUBLE  ELSE ENUM 
@@ -464,13 +466,14 @@ function_definition
 	;
 
 %%
-void yyerror()
+void yyerror(const char *s)
 {
-	errorFlag=1;
-	fflush(stdout);
-	printf("\n%s : %d :Syntax error \n",sourceCode,lineCount);
+    (void)s;
+    errorFlag = 1;
+    fflush(stdout);
+    printf("\n%s : %d :Syntax error\n", sourceCode, lineCount);
 }
-void main(int argc,char **argv){
+int main(int argc,char **argv){
 	if(argc<=1){
 		
 		printf("Invalid ,Expected Format : ./a.out <\"sourceCode\"> \n");
@@ -520,6 +523,7 @@ void main(int argc,char **argv){
 		fclose(writeConstant);
 	}
 printf("\n\n");	
+return 0;
 }
 
 void makeList(char *tokenName,char tokenType, int tokenLine)
