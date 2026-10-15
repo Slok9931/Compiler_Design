@@ -8,6 +8,8 @@ extern char *yytext;
 int paramCount;
 char icgQuad[50];
 int funcLineNumber = 0;
+int yylex(void);
+void yyerror(const char *s);
 
 %}
 
@@ -73,7 +75,7 @@ program_head
 	    tokenList * mainFunc = getSymbol("main");
 	    if(mainFunc == NULL){
 		printf("ERROR: Main function not found!\n");
-		yyerror();
+		yyerror("semantic error");
 	    }
 	    backpatch($1.nextList,mainFunc->line+1);
 	}
@@ -304,11 +306,11 @@ matched_statement
 
             if(BOOL_type == $3.type || BOOL_type == $9.type) {
                 printf("error, no boolean statements allowed as 1st or 3rd assignment in for loop\n");
-                yyerror();
+                yyerror("semantic error");
             }
             if(BOOL_type != $6.type) {
                 printf("error, 2nd argument of for loop must be boolean\n");
-                yyerror();
+                yyerror("semantic error");
             }
             backpatch($3.trueList, $5.quad);
             backpatch($13.nextList, $8.quad);
@@ -355,11 +357,11 @@ unmatched_statement
 
             if(BOOL_type == $3.type || BOOL_type == $9.type) {
                 printf("error, no boolean statements allowed as 1st or 3rd assignment in for loop\n");
-                yyerror();
+                yyerror("semantic error");
             }
             if(BOOL_type != $6.type) {
                 printf("error, 2nd argument of for loop must be boolean\n");
-                yyerror();
+                yyerror("semantic error");
             }
             backpatch($3.trueList, $5.quad);
             backpatch($13.nextList, $8.quad);
@@ -396,7 +398,7 @@ assignment
         	}
             if(destType != $3.type) {
                 printf("Type error on line: %d\n", yylineno);
-                yyerror();
+                yyerror("semantic error");
             }
 
             sprintf(icgQuad,"%s := %s",$1,$3.value);
@@ -414,7 +416,7 @@ expression
 
 	    if($2.type != INT_type){
 		    printf("ERROR: Increment not allowed for types different than Integer.\n");
-		    yyerror();
+		    yyerror("semantic error");
 	    }
 	    //Create a variable if needed
 	    if($2.cType != VAR_type){
@@ -439,7 +441,7 @@ expression
 
 	    if($2.type != INT_type){
 		    printf("ERROR: Decrement not allowed for types different than Integer.\n");
-		    yyerror();
+		    yyerror("semantic error");
 	    }
 	    //Create a variable if needed
 	    if($2.cType != VAR_type){
@@ -502,7 +504,7 @@ expression
 
 	    if($1.type != INT_type && $1.type != FLOAT_type){
 		printf("ERROR: Only Integer, Float and Bool values allowed in comparsions.\n");
-		yyerror();
+		yyerror("semantic error");
 	    }
             sprintf(icgQuad,"IF (%s <> %s) GOTO",$1.value,$3.value);
 	    $$.trueList = appendToBackPatch(NULL, appendCode(icgQuad));
@@ -518,7 +520,7 @@ expression
 
 	    if($1.type != INT_type && $1.type != FLOAT_type){
 		printf("ERROR: Only Integer, Float and Bool values allowed in comparsions.\n");
-		yyerror();
+		yyerror("semantic error");
 	    }
             sprintf(icgQuad,"IF (%s = %s) GOTO",$1.value,$3.value);
 	    $$.trueList = appendToBackPatch(NULL, appendCode(icgQuad));
@@ -542,7 +544,7 @@ expression
 
 	    if($1.type != INT_type && $1.type != FLOAT_type){
 		printf("ERROR: Only Integer, Float and Bool values allowed in comparsions.\n");
-		yyerror();
+		yyerror("semantic error");
 	    }
             sprintf(icgQuad,"IF (%s >= %s) GOTO",$1.value,$3.value);
 	    $$.trueList = appendToBackPatch(NULL, appendCode(icgQuad));
@@ -558,7 +560,7 @@ expression
 
 	    if($1.type != INT_type && $1.type != FLOAT_type){
 		printf("ERROR: Only Integer, Float and Bool values allowed in comparsions.\n");
-		yyerror();
+		yyerror("semantic error");
 	    }
 	    sprintf(icgQuad,"IF (%s <= %s) GOTO",$1.value,$3.value);
 	    $$.trueList = appendToBackPatch(NULL, appendCode(icgQuad));
@@ -574,7 +576,7 @@ expression
 
 	    if($1.type != INT_type && $1.type != FLOAT_type){
 		printf("ERROR: Only Integer, Float and Bool values allowed in comparsions.\n");
-		yyerror();
+		yyerror("semantic error");
 	    }
 	    sprintf(icgQuad,"IF (%s > %s) GOTO",$1.value,$3.value);
 	    $$.trueList = appendToBackPatch(NULL, appendCode(icgQuad));
@@ -590,7 +592,7 @@ expression
 
 	    if($1.type != INT_type && $1.type != FLOAT_type){
 		printf("ERROR: Only Integer, Float and Bool values allowed in comparsions.\n");
-		yyerror();
+		yyerror("semantic error");
 	    }
 	    sprintf(icgQuad,"IF (%s < %s) GOTO",$1.value,$3.value);
 	    $$.trueList = appendToBackPatch(NULL, appendCode(icgQuad));
@@ -607,7 +609,7 @@ expression
 
 	    if($1.type != INT_type && $1.type!= FLOAT_type &&  $3.type != INT_type && $3.type != FLOAT_type){
 		printf("ERROR: Only integer and float values allowed when adding numbers.\n");
-		yyerror();
+		yyerror("semantic error");
 	    }
 	    int type = 0;
 	    if($1.type == $3.type){
@@ -637,7 +639,7 @@ expression
 
 	    if($1.type != INT_type && $1.type!= FLOAT_type &&  $3.type != INT_type && $3.type != FLOAT_type){
 		printf("ERROR: Only integer and float values allowed when substracting numbers.\n");
-		yyerror();
+		yyerror("semantic error");
 	    }
 	    int type = 0;
 	    if($1.type == $3.type){
@@ -667,7 +669,7 @@ expression
 
 	    if($1.type != INT_type && $1.type!= FLOAT_type &&  $3.type != INT_type && $3.type != FLOAT_type){
 		printf("ERROR: Only integer and float values allowed when multiplicating numbers.\n");
-		yyerror();
+		yyerror("semantic error");
 	    }
 	    int type = 0;
 	    if($1.type == $3.type){
@@ -697,7 +699,7 @@ expression
 
 	    if($1.type != INT_type && $1.type!= FLOAT_type &&  $3.type != INT_type && $3.type != FLOAT_type){
 		printf("ERROR: Only integer and float values allowed when dividing numbers.\n");
-		yyerror();
+		yyerror("semantic error");
 	    }
 	    int type = 0;
 	    if($1.type == $3.type){
@@ -727,7 +729,7 @@ expression
 
 	    if($1.type != INT_type && $1.type!= FLOAT_type &&  $3.type != INT_type && $3.type != FLOAT_type){
 		printf("ERROR: Only integer and float values allowed when caluclating mod.\n");
-		yyerror();
+		yyerror("semantic error");
 	    }
 	    int type = 0;
 	    if($1.type == $3.type){
@@ -758,7 +760,7 @@ expression
 	    if($2.type != BOOL_type){
 		if($2.type != INT_type && $2.type != FLOAT_type){
 		    printf("ERROR: Only Bool, Int and Float allowed in logical expressions!\n");
-		    yyerror();
+		    yyerror("semantic error");
 		}
 		sprintf(icgQuad,"IF (%s <> 0) GOTO",$2.value);
 		$$.falseList = appendToBackPatch(NULL,appendCode(icgQuad));
@@ -775,7 +777,7 @@ expression
     | U_PLUS expression
         {
             if(INT_type != $2.type && FLOAT_type != $2.type) {
-                yyerror();
+                yyerror("semantic error");
             }
             $$ = $2;
         }
@@ -787,7 +789,7 @@ expression
             } else if (FLOAT_type == $2.type) {
                 $$.value = nextFloatVar();
             } else {
-                yyerror();
+                yyerror("semantic error");
             }
             sprintf(icgQuad, "%s := -%s", $$.value, $2.value);
             appendCode (icgQuad);
@@ -813,7 +815,7 @@ expression
             int varType = getFunctionType($1);
             if(varType == 0){
             	printf("ERROR: Function %s not defined!\n",$1);
-		yyerror();
+		yyerror("semantic error");
             }
             char* var = NULL;
             switch(varType){
@@ -839,7 +841,7 @@ expression
             int varType = getFunctionType($1);
             if(varType == 0){
             	printf("ERROR: Function %s not defined!\n",$1);
-		yyerror();
+		yyerror("semantic error");
             }
             char* var = NULL;
             switch(varType){
@@ -866,7 +868,7 @@ expression
 	    int varType = getSymbolType($1);
             if(varType == 0){
             	printf("ERROR: Variable %s not in scope!\n",$1);
-		yyerror();
+		yyerror("semantic error");
             }
 	    $$.value = $1;
 	    $$.type = varType;
@@ -881,7 +883,7 @@ exp_list
 
 	    if($1.type != INT_type && $1.type != FLOAT_type){
 		printf("ERROR: Only Integer and Float are allowed as parameter types.\n");
-		yyerror();
+		yyerror("semantic error");
 	    }
 	    $$.queue = addSymbolToParameterQueue(NULL,$1.value,$1.type);
 	    $$.count = 1;
@@ -892,7 +894,7 @@ exp_list
 
 	      if($3.type != INT_type && $3.type != FLOAT_type){
 		  printf("ERROR: Only Integer and Float are allowed as parameter types.\n");
-		  yyerror();
+		  yyerror("semantic error");
 	      }
 	      $$.queue = addSymbolToParameterQueue($1.queue,$3.value,$3.type);
 	      $$.count = $1.count + 1;

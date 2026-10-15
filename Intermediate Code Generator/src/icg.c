@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "icg.h"
 #include "y.tab.h"
 
@@ -7,13 +9,13 @@ tokenList  *bufferPtr = NULL;
 threeAddressCode   *codePtr = NULL;
 
 extern int yylineno;
-extern int yyin;
+extern FILE *yyin;
  
 int globalOffset = 0, tempIntCounter = 0,tempFloatCounter= 0,currentLine = -1;
 
-void yyerror() {
-    printf("ERROR: %d : Syntactical Error\n",yylineno);
-    exit(1);
+void yyerror(const char *s)
+{
+    fprintf(stderr, "%s\n", s);
 }
 
 int main(int argc, char **argv) {

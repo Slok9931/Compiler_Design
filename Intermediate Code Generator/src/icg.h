@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <malloc.h>
 #define PARENT_NONE NULL
 
 typedef enum
@@ -96,5 +95,9 @@ int nextquad();
 void addFunction(char *name, unsigned int parameter_count, tokenReturnType  ret_type, int line);
 
 tokenList * lookup(char *name);
+
+tokenList *getSymbol(char *token);
+void addSymbolToQueue(char *name, tokenType type, unsigned long param_no);
+void addFunctionPrototype(char *name, unsigned int paramCount, tokenReturnType ret_type);
 
 extern tokenList *symbolTable;
