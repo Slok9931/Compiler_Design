@@ -26,6 +26,7 @@ char *sourceCode;
 int tempCheckType=3;
 
 int semanticErr=0,lineSemanticCount;
+void addSymbol(char *tokenName, int tokenLine, int scopeVal);
 int checkScope(char *tempToken,int lineCount)
 {	tokenList *temp=NULL;
 	char type[20];
@@ -50,7 +51,7 @@ int checkScope(char *tempToken,int lineCount)
 	}
 	else
 	{
-		addSymbol(tempToken,lineCount);
+		addSymbol(tempToken, lineCount, scopeCount);
 		if(strcmp(type,"VOID")==0)
             		return(1);
         	if(strcmp(type,"CHAR")==0)
