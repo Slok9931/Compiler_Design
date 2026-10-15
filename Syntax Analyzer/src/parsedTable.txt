@@ -1,0 +1,35 @@
+
+				Parsed	Table
+
+		Token			Type							LineNumber
+
+                void                       Keyword                                                      2 3 11
+                 sum                    Identifier                                                      2 9 11
+                 int                       Keyword                                                 2 2 5 11 12
+                   ,                    Punctuator                                             2 5 5 8 9 11 14
+                   (                    Punctuator                                             2 3 7 8 9 11 14
+                   )                    Punctuator                                             2 3 7 8 9 11 14
+                   ;                    Punctuator                                     2 5 6 7 8 9 12 13 14 15
+                main                    Identifier                                                           3
+                   {                    Punctuator                                                        4 11
+                   a                    Identifier                                                           5
+                   5                      Constant                                                         5 9
+                   =                      Operator                                                   5 5 12 13
+                   c                    Identifier                                                           5
+                   d                    Identifier                                                           5
+                  10                      Constant                                                           5
+                char                       Keyword                                                        6 11
+                   b                    Identifier                                                       6 8 9
+              printf                    Identifier                                                        7 14
+   "\nEnter Number:"                String Literal                                                           7
+               scanf                    Identifier                                                           8
+                "%d"                String Literal                                                           8
+                   &                      Operator                                                           8
+                   }                    Punctuator                                                       10 16
+                inp1                    Identifier                                                       11 13
+                inp2                    Identifier                                                       11 13
+                   s                    Identifier                                                    12 13 14
+                   0                      Constant                                                          12
+                   +                      Operator                                                          13
+        "\nSum : %d"                String Literal                                                          14
+              return                       Keyword                                                          15

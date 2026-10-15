@@ -1,0 +1,14 @@
+
+			   Symbol Table
+			------------------
+
+   Name            DataType      ReturnType      Offset          Scope
+------------------------------------------------------------------------
+func                 Proto          Int            0            None        
+a                    Int            None           4            func        
+b                    Int            None           4            func        
+a                    Int            None           0            main        
+a                    Int            None           4            main        
+Ti_1                 Int            None           8            main        
+Ti_2                 Int            None           12           main        
+main                 Main           Int            16           None        

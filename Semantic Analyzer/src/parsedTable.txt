@@ -1,0 +1,19 @@
+
+				Parsed Table
+
+		Token						Type							Line Number
+
+                void                       Keyword                                                         2 5
+                   (                    Punctuator                                                   2 5 13 14
+                   )                    Punctuator                                                   2 5 13 14
+                   {                    Punctuator                                                      2 6 15
+                 int                       Keyword                                                3 8 10 16 17
+                   ;                    Punctuator                                  3 8 9 10 11 12 13 14 16 17
+                   }                    Punctuator                                                     4 18 21
+                   =                      Operator                                                     8 11 12
+                   ,                    Punctuator                                                           8
+                char                       Keyword                                                           9
+                   [                    Punctuator                                                       10 10
+                   ]                    Punctuator                                                       10 10
+                   +                      Operator                                                          12
+     "\nHello World"                String Literal                                                          13
