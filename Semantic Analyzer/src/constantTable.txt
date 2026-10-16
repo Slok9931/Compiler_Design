@@ -1,8 +1,0 @@
-
-   								Constant Table 
-
- 						Value							Line Number
-
-                                                10                                                        8 10
-                                               100                                                          10
-                                                12                                                          12

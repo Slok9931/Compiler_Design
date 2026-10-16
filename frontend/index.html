@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compiler Studio</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#30363d;--text:#e6edf3;--mute:#8b949e;--acc:#58a6ff;--ok:#3fb950;--err:#f85149;--warn:#d29922;color-scheme:dark}
+@media (prefers-color-scheme:light){:root:not([data-theme=dark]){--bg:#f6f8fa;--panel:#fff;--line:#d0d7de;--text:#1f2328;--mute:#656d76;--acc:#0969da;--ok:#1a7f37;--err:#cf222e;--warn:#9a6700;color-scheme:light}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:14px Inter,system-ui,sans-serif;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+h1{font-size:17px;margin:0;font-weight:600}h1 span{color:var(--acc)}
+.pipe{display:flex;gap:6px;margin-left:auto;align-items:center;flex-wrap:wrap}
+.step{padding:4px 10px;border:1px solid var(--line);border-radius:20px;color:var(--mute);font-size:12px}
+.step.ok{color:var(--ok);border-color:var(--ok)}.step.bad{color:var(--err);border-color:var(--err)}
+main{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;min-height:0}
+@media(max-width:800px){main{grid-template-columns:1fr;overflow:auto}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;min-height:280px;min-width:0;overflow:hidden}
+.bar{display:flex;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+select,button{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font:inherit;cursor:pointer}
+button.run{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:600;margin-left:auto}
+button:disabled{opacity:.6;cursor:wait}
+.ed{flex:1;display:flex;min-height:0;font:13px/1.55 'JetBrains Mono',monospace}
+#ln{padding:10px 8px;text-align:right;color:var(--mute);user-select:none;overflow:hidden;border-right:1px solid var(--line);white-space:pre}
+#code{flex:1;background:transparent;color:var(--text);border:0;outline:0;resize:none;padding:10px;font:inherit;white-space:pre;overflow:auto;tab-size:4}
+.tabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{padding:9px 14px;color:var(--mute);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-radius:0;border-top:0;border-left:0;border-right:0}
+.tab.on{color:var(--text);border-bottom-color:var(--acc)}
+#view{flex:1;overflow:auto;padding:12px;font:12.5px/1.6 'JetBrains Mono',monospace}
+pre{margin:0;white-space:pre-wrap}
+table{border-collapse:collapse;width:100%}td,th{padding:5px 10px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--mute);font-weight:500}
+.kw{color:var(--acc)}.lbl{color:var(--warn)}.t{color:var(--mute)}
+.diag{padding:8px 10px;margin-bottom:6px;border-left:3px solid var(--err);background:color-mix(in srgb,var(--err) 10%,transparent);border-radius:4px}
+.empty{color:var(--mute);text-align:center;margin-top:60px;font-family:Inter,sans-serif}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:14px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:10px 12px}.stat b{display:block;font:600 22px Inter,sans-serif}.stat span{color:var(--mute);font:12px Inter,sans-serif}
+.ph{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;font-family:Inter,sans-serif}
+.ph i{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;color:#fff;flex:none;margin-top:1px}
+.ph.ok i{background:var(--ok)}.ph.bad i{background:var(--err)}.ph b{display:block}.ph small{color:var(--mute);font-size:12.5px}
+.badge{padding:1px 8px;border-radius:10px;font:11px Inter,sans-serif;border:1px solid var(--line)}
+.b-kw{color:var(--acc);border-color:var(--acc)}.b-id{color:var(--ok);border-color:var(--ok)}.b-num{color:var(--warn);border-color:var(--warn)}.b-op{color:var(--err);border-color:var(--err)}
+h3{font:600 13px Inter,sans-serif;color:var(--mute);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.05em}
+.hint{padding:8px 12px;border-top:1px solid var(--line);color:var(--mute);font:12px/1.5 Inter,sans-serif}.hint code{font:11.5px 'JetBrains Mono',monospace;color:var(--text)}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚙️ Compiler <span>Studio</span></h1>
+  <div class="pipe" id="pipe">
+    <span class="step" data-s="lexical">Lexical</span>→<span class="step" data-s="syntax">Syntax</span>→<span class="step" data-s="semantic">Semantic</span>→<span class="step" data-s="icg">Intermediate Code</span>
+  </div>
+</header>
+<main>
+  <section class="card">
+    <div class="bar">
+      <select id="ex"></select>
+      <button class="run" id="run">▶ Compile</button>
+    </div>
+    <div class="ed"><div id="ln">1</div><textarea id="code" spellcheck="false"></textarea></div>
+    <div class="hint"><b>Supported C subset:</b> <code>int</code>/<code>float</code> variables declared at the <i>top</i> of a function (before any statement), no initialisers like <code>int a = 5;</code>, <code>int main()</code> required, <code>if/else</code>, <code>while</code>, <code>for</code>, blocks with statements only, and at least one statement per function.</div>
+  </section>
+  <section class="card">
+    <div class="tabs" id="tabs"></div>
+    <div id="view"><div class="empty">Compiling…</div></div>
+  </section>
+</main>
+<script>
+const API = "";  // same-origin by default. For a separate frontend host, set e.g. "https://your-api.onrender.com"
+const EXAMPLES = {
+"Loop + arithmetic": `int main(){\n\tint a;\n\ta = a + 10;\n\twhile(a < 10){\n\t\ta = a + 34;\n\t}\n\treturn 0;\n}\n`,
+"If / else": `int main(){\n\tint x, y;\n\tx = 5;\n\tif(x > 3){\n\t\ty = x * 2;\n\t} else {\n\t\ty = x - 1;\n\t}\n\treturn 0;\n}\n`,
+"Multiple functions": `void func(){\n\tint a;\n\ta = 1;\n}\nint main(){\n\tint b;\n\tb = 1;\n\treturn 0;\n}\n`,
+"Nested block": `int main(){\n\tint a, b;\n\ta = b + 12;\n\t{\n\t\ta = 5;\n\t}\n\treturn 0;\n}\n`,
+"Error: duplicate declaration": `int main(){\n\tint a;\n\tint a;\n\ta = a + 10;\n\treturn 0;\n}\n`,
+"Error: undeclared variable": `int main(){\n\tint a;\n\ta = c + 1;\n\treturn 0;\n}\n`};
+const TABS = [["overview","Overview"],["tokens","Tokens"],["symbols","Symbol Table"],["tac","Three-Address Code"],["diag","Diagnostics"],["raw","Raw Output"]];
+const PH = [["lexical","Lexical analysis"],["syntax","Syntax analysis"],["semantic","Semantic analysis"],["icg","Intermediate code"]];
+const $ = id => document.getElementById(id);
+let data = null, tab = "overview";
+const esc = s => String(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+$("ex").innerHTML = Object.keys(EXAMPLES).map(k => `<option>${k}</option>`).join("");
+$("ex").onchange = () => { $("code").value = EXAMPLES[$("ex").value]; lines(); run(); };
+$("code").value = EXAMPLES["Loop + arithmetic"];
+$("code").oninput = lines;
+$("code").onscroll = () => $("ln").scrollTop = $("code").scrollTop;
+$("code").onkeydown = e => {
+  if (e.key === "Tab") { e.preventDefault(); const t = e.target; t.setRangeText("\t", t.selectionStart, t.selectionEnd, "end"); lines(); }
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) run();
+};
+function lines(){ $("ln").textContent = Array.from({length: $("code").value.split("\n").length}, (_, i) => i + 1).join("\n"); }
+$("tabs").innerHTML = TABS.map(([k, n]) => `<button class="tab" data-k="${k}">${n}</button>`).join("");
+$("tabs").onclick = e => { if (e.target.dataset.k) { tab = e.target.dataset.k; render(); } };
+$("run").onclick = run;
+
+// ---- parsing of the compiler's text output ----
+const msgLines = d => d.stdout.split("\n").map(l => l.trim()).filter(l => l && !/parsing completed|generated|symbol table is empty/i.test(l));
+const rows = t => (t || "").split("\n").map(l => l.trim()).filter(Boolean);
+function tokens(){
+  return rows(data.lexical.files["parsedTable.txt"]).map(l => l.split(/\s+/)).filter(p => p.length >= 4 && /^\d+$/.test(p.at(-1)) && /^\d+$/.test(p.at(-2)))
+    .map(p => ({lex: p.slice(0, -3).join(" "), tok: p.at(-3), line: p.at(-1)}));
+}
+function symbols(){
+  return rows(data.icg.files["symbolTable.txt"]).map(l => l.split(/\s+/)).filter(p => p.length === 5 && /^\d+$/.test(p[3]))
+    .map(([name, type, ret, off, scope]) => ({name, type, ret, off, scope}));
+}
+function tac(){
+  return rows(data.icg.files["threeAddressCode.txt"]).map(l => l.match(/^(\d+)\s+(.*)$/)).filter(Boolean).map(m => ({n: m[1], c: m[2]}));
+}
+const badge = t => { const k = t.toLowerCase(); const c = /key|type/.test(k) ? "kw" : /ident/.test(k) ? "id" : /const|num|int|float|string|char/.test(k) ? "num" : /op|relat|assign|logic/.test(k) ? "op" : ""; return `<span class="badge b-${c}">${esc(t)}</span>`; };
+function status(){
+  const T = tokens(), S = symbols(), C = tac();
+  const st = {};
+  for (const [k] of PH) { const d = data[k], m = msgLines(d); const done = k === "lexical" || /parsing completed/i.test(d.stdout); st[k] = {ok: !d.crashed && !m.length && done, msgs: m}; if (!st[k].ok && !m.length) st[k].msgs = [d.crashed ? "The compiler phase crashed." : "The phase did not report completion."]; }
+  st.lexical.sum = st.lexical.ok ? `${T.length} tokens recognised · ${new Set(T.filter(t => /ident/i.test(t.tok)).map(t => t.lex)).size} unique identifiers` : "Lexical errors found";
+  st.syntax.sum = st.syntax.ok ? "Program matches the C grammar — no syntax errors" : "Syntax errors found";
+  st.semantic.sum = st.semantic.ok ? "Declarations, scopes and types are consistent" : "Semantic errors found";
+  st.icg.sum = st.icg.ok && C.length ? `${C.length} three-address instructions · ${S.filter(s => /^Ti_/.test(s.name)).length} temporaries` : "No intermediate code generated";
+  return {st, T, S, C};
+}
+
+async function run(){
+  $("run").disabled = true; $("run").textContent = "Compiling…";
+  try {
+    const r = await fetch(API + "/api/compile", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({code: $("code").value})});
+    data = await r.json();
+    if (data.error) throw new Error(data.error);
+  } catch (err) {
+    data = null; $("view").innerHTML = `<div class="diag">Could not reach the compiler backend: ${esc(err.message)}</div>`;
+  }
+  $("run").disabled = false; $("run").textContent = "▶ Compile";
+  if (data) { const {st} = status(); document.querySelectorAll(".step").forEach(s => s.className = "step " + (st[s.dataset.s].ok ? "ok" : "bad")); render(); }
+}
+
+function render(){
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.k === tab));
+  if (!data) return;
+  const {st, T, S, C} = status(), v = $("view");
+  if (tab === "overview") {
+    const good = PH.every(([k]) => st[k].ok);
+    v.innerHTML = `<div class="grid">
+      <div class="stat"><b style="color:var(--${good ? "ok" : "err"})">${good ? "Success" : "Failed"}</b><span>Build result</span></div>
+      <div class="stat"><b>${T.length}</b><span>Tokens</span></div>
+      <div class="stat"><b>${S.filter(s => !/^Ti_/.test(s.name)).length}</b><span>Symbols</span></div>
+      <div class="stat"><b>${C.length}</b><span>TAC instructions</span></div></div>
+      ${PH.map(([k, n]) => `<div class="ph ${st[k].ok ? "ok" : "bad"}"><i>${st[k].ok ? "✓" : "✕"}</i><div><b>${n}</b><small>${esc(st[k].sum)}</small>${st[k].msgs.map(m => `<div class="t" style="color:var(--err)">${esc(m)}</div>`).join("")}</div></div>`).join("")}
+      ${C.length ? `<h3>Generated code preview</h3>${codeTable(C.slice(0, 6))}` : ""}`;
+  }
+  else if (tab === "tokens") v.innerHTML = T.length ? `<table><tr><th>Lexeme</th><th>Token type</th><th>Line</th></tr>${T.map(t => `<tr><td>${esc(t.lex)}</td><td>${badge(t.tok)}</td><td class="t">${t.line}</td></tr>`).join("")}</table>` : `<div class="empty">No tokens produced (see Diagnostics)</div>`;
+  else if (tab === "symbols") v.innerHTML = S.length ? `<table><tr><th>Name</th><th>Type</th><th>Returns</th><th>Offset</th><th>Scope</th></tr>${S.map(s => `<tr><td>${esc(s.name)}</td><td>${badge(s.type)}</td><td class="t">${esc(s.ret)}</td><td class="t">${s.off}</td><td>${esc(s.scope)}</td></tr>`).join("")}</table>` : `<div class="empty">No symbol table generated (see Diagnostics)</div>`;
+  else if (tab === "tac") v.innerHTML = C.length ? codeTable(C) : `<div class="empty">No three-address code generated (see Diagnostics)</div>`;
+  else if (tab === "diag") {
+    const m = PH.flatMap(([k]) => st[k].msgs.map(x => [k, x]));
+    v.innerHTML = m.length ? m.map(([k, x]) => `<div class="diag"><span class="t">${k}</span> · ${esc(x)}</div>`).join("") : `<div class="empty">✓ No errors or warnings</div>`;
+  }
+  else v.innerHTML = PH.map(([k]) => `<h3>${k}</h3><pre>${esc(data[k].stdout.trim() || "(no output)")}</pre>`).join("");
+}
+function codeTable(C){
+  return `<table><tr><th>#</th><th>Instruction</th></tr>${C.map(({n, c}) => `<tr><td class="t">${n}</td><td>${esc(c).replace(/\b(GOTO|IF|RETURN)\b/g, '<span class="kw">$1</span>').replace(/\b(Ti_\d+)\b/g, '<span class="lbl">$1</span>')}</td></tr>`).join("")}</table>`;
+}
+lines(); run();
+</script>
+</body>
+</html>

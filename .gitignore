@@ -1,0 +1,6 @@
+__pycache__/
+*.o
+a.out
+lex.yy.c
+y.tab.*
+*~
